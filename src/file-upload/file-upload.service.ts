@@ -5,22 +5,25 @@ import { AddressService } from 'src/address/address.service';
 
 @Injectable()
 export class FileUploadService {
-    constructor(private readonly addressService: AddressService){}
+    constructor(private readonly addressService: AddressService) { }
 
     async readExelFile(fileData: Buffer) {
         const book = new ExcelJS.Workbook()
         await book.xlsx.load(fileData);
 
-        const sheet = book.getWorksheet(1)
+        const worksheet = book.getWorksheet(1)
 
+
+
+        //this.addressService.parseAddresses(addresses)
+
+    }
+
+    async readAdresses(worksheet: ExcelJS.Worksheet) {
         const addresses = [];
-        sheet.eachRow((row, rowNumber) => {
-            if (rowNumber != 1) {
-                addresses.push((row.getCell(1)).value)
-            }
+
+        worksheet.getColumn("Полный адрес").eachCell({ includeEmpty: false }, (cell, rowNumber) => {
+            addresses.push(cell.value);
         });
-
-        this.addressService.parseAddresses(addresses)
-
     }
 }
