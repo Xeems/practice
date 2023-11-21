@@ -6,9 +6,13 @@ import { FileUploadModule } from './file-upload/file-upload.module';
 import { AddressService } from './address/address.service';
 import { AddressModule } from './address/address.module';
 import { DataModule } from './data/data.module';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
 
 @Module({
-  imports: [AuthModule, UsersModule, PrismaModule, FileUploadModule, AddressModule, DataModule],
+  imports: [AuthModule, UsersModule, PrismaModule, FileUploadModule, AddressModule, DataModule,
+    DevtoolsModule.register({
+      http: process.env.NODE_ENV !== 'production',
+    }),],
   providers: [AddressService],
 })
-export class AppModule {}
+export class AppModule { }

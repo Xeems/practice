@@ -17,6 +17,7 @@ model User {
 	middle_name				String?
 	login					String			@unique
 	password				String
+	excel_document  		Excel_document[]
 }
 
 model Address {
@@ -25,7 +26,8 @@ model Address {
 	street					String
 	house					String
 	appartment				String
-	Meter_readings			Meter_readings[]
+	meter_readings			Meter_readings[]
+	erors					Eror[]
 }
 
 model Meter_readings {
@@ -34,4 +36,26 @@ model Meter_readings {
 	address_id				Int
 	hot_water				Float
 	cold_water				Float
+	excel_document			Excel_document	@relation(fields: [excel_document_id], references: [excel_document_id])
+	excel_document_id		Int
+}
+
+model Excel_document{
+	excel_document_id		Int				@default(autoincrement()) @id
+	document_name			String
+	upload_date				DateTime	
+	user					User?			@relation(fields: [user_id], references: [user_id])
+	user_id					Int?
+	meter_readeings			Meter_readings[]
+	eror					Eror[]
+}
+
+model Eror{
+	eror_id					Int				@default(autoincrement()) @id
+	adress					Address			@relation(fields: [address_id], references: [address_id])
+	address_id				Int
+	eror_content			String
+	excel_document			Excel_document	@relation(fields: [excel_document_id], references: [excel_document_id])
+	excel_document_id		Int		
+	document_row			Int
 }

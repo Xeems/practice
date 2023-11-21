@@ -1,29 +1,65 @@
 import { Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
-import * as fs from 'fs';
 import { AddressService } from 'src/address/address.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Address } from 'utils/globalTypes';
 
 @Injectable()
 export class FileUploadService {
-    constructor(private readonly addressService: AddressService) { }
+    constructor(private readonly addressService: AddressService,
+        private readonly prismaService: PrismaService) { }
 
-    async readExelFile(fileData: Buffer) {
+    async readExelFile(file: Express.Multer.File) {
+        const fileData = file.buffer
         const book = new ExcelJS.Workbook()
         await book.xlsx.load(fileData);
-
         const worksheet = book.getWorksheet(1)
 
+        this.uploadFileToDB(file)
 
-
-        //this.addressService.parseAddresses(addresses)
+        const adresses = await this.readAdressesAndParse(worksheet)
+        const meters = await this.readMeters(worksheet)
 
     }
 
-    async readAdresses(worksheet: ExcelJS.Worksheet) {
-        const addresses = [];
+    async uploadFileToDB(file: Express.Multer.File) {
+        let dateTime = new Date()
 
-        worksheet.getColumn("Полный адрес").eachCell({ includeEmpty: false }, (cell, rowNumber) => {
+        await this.prismaService.excel_document.create({
+            data: {
+                document_name: file.originalname,
+                upload_date: dateTime.toISOString(),
+            }
+        })
+    }
+
+    async readAdressesAndParse(worksheet: ExcelJS.Worksheet) {
+        let addresses: any = [];
+
+        worksheet.getColumn(1).eachCell({ includeEmpty: false }, (cell, rowNumber) => {
             addresses.push(cell.value);
         });
+
+        return this.addressService.parseAddresses(addresses)
+    }
+
+    async readMeters(worksheet: ExcelJS.Worksheet) {
+        let meters: any[][] = []
+
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber != 1) {
+                const hotWater = row.getCell(2).value
+                const coldWater = row.getCell(3).value
+                meters.push([hotWater, coldWater])
+            }
+        })
+        return meters
+    }
+
+    async verifyData(addresses: Address[], meters: [][]) {
+        if (addresses.length != meters.length) {
+            return "Количество адресов и показателей счетчика не совпадает"
+        }
+
     }
 }

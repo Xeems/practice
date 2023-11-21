@@ -14,6 +14,6 @@ export class FileUploadController {
       new FileTypeValidator({ fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
     ]
   })) file: Express.Multer.File) {
-    await this.fileUploadService.readExelFile(file.buffer)
+    return await this.fileUploadService.readExelFile(file)
   }
 }
