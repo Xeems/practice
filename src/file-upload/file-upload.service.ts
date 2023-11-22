@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { AddressService } from 'src/address/address.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -19,6 +19,9 @@ export class FileUploadService {
 
         const adresses = await this.readAdressesAndParse(worksheet)
         const meters = await this.readMeters(worksheet)
+        console.log(meters.length, adresses.length)
+        console.log(adresses)
+        return this.verifyData(adresses, meters)
 
     }
 
@@ -56,10 +59,10 @@ export class FileUploadService {
         return meters
     }
 
-    async verifyData(addresses: Address[], meters: [][]) {
+    async verifyData(addresses: Address[], meters: any[][]) {
         if (addresses.length != meters.length) {
-            return "Количество адресов и показателей счетчика не совпадает"
+            return  new ConflictException('Количество адресоов и записей не совпадает')
         }
-
+        return "Томас но мы же кошки"
     }
 }
