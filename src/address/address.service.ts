@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Address } from 'utils/globalTypes';
-import axios from 'axios';
+
 
 
 
@@ -19,7 +19,7 @@ export class AddressService {
     }
 
     addressNormalization(address: string): Address {
-        const result= {} as Address
+        const result = {} as Address
 
         // Регулярные выражения для разбора адреса
         const regionRegex = /(?:обл(?:асть)?)?\s*([^\d,]+)/i;
@@ -28,20 +28,18 @@ export class AddressService {
         const houseRegex = /д(?:ом)?\.\s*([\d/]+)/i;
         const apartmentRegex = /кв(?:артира)?\.\s*([\dа-я/]+)/i;
 
-        // Применение регулярных выражений к адресу
         const regionMatch = address.match(regionRegex);
         const cityMatch = address.match(cityRegex);
         const streetMatch = address.match(streetRegex);
         const houseMatch = address.match(houseRegex);
         const apartmentMatch = address.match(apartmentRegex);
 
-        // Заполнение объекта результатами парсинга
         if (regionMatch) regionMatch[1].trim();
         if (cityMatch) result.city = cityMatch[1].trim();
         if (streetMatch) result.street = streetMatch[1].trim();
         if (houseMatch) result.house = houseMatch[1].trim();
         if (apartmentMatch) result.appartment = apartmentMatch[1].trim();
-
+        
         return result
     }
 

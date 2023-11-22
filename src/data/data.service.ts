@@ -7,10 +7,8 @@ import { Meter_readings } from '@prisma/client';
 export class DataService {
     constructor(private prisma: PrismaService) { }
 
-    async uploadMetrics(meter_readings: Meter_readings[]) {
-        const meters = await this.prisma.meter_readings.createMany({
-            data: meter_readings
-        })
+    async uploadMetrics(addresses: Address[], metrics: any [][]) {
+        
     }
 
     async uploadAddressesToDb(addresses: Address[]) {
