@@ -27,7 +27,7 @@ model Address {
 	house					String
 	appartment				String
 	meter_readings			Meter_readings[]
-	erors					Eror[]
+	erors					Error[]
 }
 
 model Meter_readings {
@@ -47,10 +47,10 @@ model Excel_document{
 	user					User?			@relation(fields: [user_id], references: [user_id])
 	user_id					Int?
 	meter_readeings			Meter_readings[]
-	eror					Eror[]
+	eror					Error[]
 }
 
-model Eror{
+model Error{
 	eror_id					Int				@default(autoincrement()) @id
 	adress					Address			@relation(fields: [address_id], references: [address_id])
 	address_id				Int
