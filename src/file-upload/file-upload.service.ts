@@ -11,7 +11,8 @@ export class FileUploadService {
     constructor(private readonly addressService: AddressService,
         private readonly prismaService: PrismaService,
         private readonly dataService: DataService,
-        private readonly dataVerificationService: DataVerificationService) { }
+        private readonly dataVerificationService: DataVerificationService) 
+        { }
 
     async readExelFile(file: Express.Multer.File) {
         const fileData = file.buffer
@@ -19,7 +20,7 @@ export class FileUploadService {
         await book.xlsx.load(fileData);
         const worksheet = book.getWorksheet(1)
 
-        const uploadedFile = await this.uploadFileToDB(file)
+        const excelDocument = await this.uploadFileToDB(file)
 
         const addresses = await this.readAdressesAndParse(worksheet)
         const metrics = await this.readMeters(worksheet)
@@ -31,7 +32,10 @@ export class FileUploadService {
 
         const metricsWithAdresses = await this.buildMeterReadings(addresses, metrics)
 
-        const validData = await this.dataVerificationService.checkErors(metricsWithAdresses, uploadedFile)
+        const validData = await this.dataVerificationService.checkErors(metricsWithAdresses, excelDocument)
+        console.log(validData)
+
+        return await this.dataService.uploadData(validData, excelDocument)
 
     }
 

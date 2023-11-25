@@ -11,7 +11,7 @@ import { DataVerificationService } from './data-verification/data-verification.s
 import { DataVerificationModule } from './data-verification/data-verification.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, PrismaModule, FileUploadModule, AddressModule, DataModule,
+  imports: [AuthModule, UsersModule, PrismaModule, FileUploadModule, AddressModule, DataModule, DataVerificationModule,
     DevtoolsModule.register({
       http: process.env.NODE_ENV !== 'production',
     }),

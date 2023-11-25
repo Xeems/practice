@@ -29,7 +29,7 @@ export type Error_row = {
     error_id?: number
     address?: Address
     error_content: string
-    excel_document_id?: number
+    excel_document_id: number
     excel_document?: Excel_document
     document_row: number
 }
