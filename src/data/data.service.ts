@@ -70,4 +70,55 @@ export class DataService {
             })
         }
     }
+
+    async uploadFileToDB(file: Express.Multer.File) {
+        let dateTime = new Date()
+
+        const uploadedFile: Excel_document = await this.prisma.excel_document.create({
+            data: {
+                document_name: file.originalname,
+                upload_date: dateTime.toISOString(),
+            }
+        })
+
+        return uploadedFile
+    }
+
+    async getDocumentData(document_id: number) {
+        const excel_document = await this.prisma.excel_document.findFirstOrThrow({
+            where:{
+                excel_document_id: document_id
+            }
+        })
+
+        const meter_readings = await this.prisma.meter_readings.findMany({
+            where:{
+                excel_document_id: excel_document.excel_document_id
+            },
+            select: {             
+                address_id: true,
+                address: {
+                    select: {
+                        city: true,
+                        street: true,
+                        house: true,
+                        appartment: true
+                    }
+                },
+                hot_water: true,
+                cold_water: true
+            }
+             
+        })
+
+        const errors = await this.prisma.error.findMany({
+            where:{
+                excel_document_id : excel_document.excel_document_id
+            }
+        })
+
+        console.log(excel_document, meter_readings, errors)
+
+        return {excel_document, meter_readings, errors}
+    }
 }
