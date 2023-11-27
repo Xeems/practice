@@ -16,7 +16,6 @@ export class DataService {
             const metric = await this.uploadMetric(metrics[i])
             data.push(metric)
         }
-        console.log(data)
         return data
     }
 
@@ -84,8 +83,8 @@ export class DataService {
         return uploadedFile
     }
 
-    async getDocumentData(document_id: number) {
-        const excel_document = await this.prisma.excel_document.findFirstOrThrow({
+    async getDocumentData(document_id: number): Promise<[Excel_document, Meter_readings[], Error_row[]]> {
+        const excel_document: Excel_document = await this.prisma.excel_document.findFirstOrThrow({
             where:{
                 excel_document_id: document_id
             }
@@ -116,9 +115,6 @@ export class DataService {
                 excel_document_id : excel_document.excel_document_id
             }
         })
-
-        console.log(excel_document, meter_readings, errors)
-
-        return {excel_document, meter_readings, errors}
+        return [excel_document, meter_readings, errors]
     }
 }

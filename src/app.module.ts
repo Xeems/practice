@@ -10,11 +10,13 @@ import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { DataVerificationService } from './data-verification/data-verification.service';
 import { DataVerificationModule } from './data-verification/data-verification.module';
 
+
 @Module({
   imports: [AuthModule, UsersModule, PrismaModule, FileUploadModule, AddressModule, DataModule, DataVerificationModule,
     DevtoolsModule.register({
       http: process.env.NODE_ENV !== 'production',
     }),
+
     DataVerificationModule,],
   providers: [AddressService, DataVerificationService],
 })

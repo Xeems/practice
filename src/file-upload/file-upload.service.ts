@@ -31,7 +31,6 @@ export class FileUploadService {
         const metricsWithAdresses = await this.buildMeterReadings(addresses, metrics)
 
         const validData = await this.dataVerificationService.checkErors(metricsWithAdresses, excelDocument)
-        console.log(validData)
 
         await this.dataService.uploadData(validData, excelDocument)
         return await this.dataService.getDocumentData(excelDocument.excel_document_id)
