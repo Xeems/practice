@@ -9,7 +9,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService) { }
 
-  async validateUser(login: string, pass: string): Promise<User | null> {
+  async validateUser(login: string, pass: string) {
     const user = await this.usersService.findByLogin(login);
     if (user && user.password === pass) {
       const { password, ...result } = user;

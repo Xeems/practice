@@ -18,7 +18,10 @@ model User {
 	login					String			@unique
 	password				String
 	excel_document  		Excel_document[]
+	user_role				String			@default("USER")			
 }
+
+
 
 model Address {
 	address_id				Int				@default(autoincrement()) @id

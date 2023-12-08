@@ -5,4 +5,10 @@ export class User {
     middle_name?: string;
     login: string;
     password?: string;
+    user_role: UserRole 
+}
+
+export enum UserRole {
+    USER = "USER",
+    ADMIN = "ADMIN"
 }
