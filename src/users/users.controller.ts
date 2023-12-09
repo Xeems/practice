@@ -1,8 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Header } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Header, SetMetadata } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { LocalAuthGuard } from 'src/guard/local.guard';
+import { LocalAuthGuard } from 'src/auth/guard/local.guard';
 import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
+import { UserRole } from './entities/user.entity';
+import { AuthGuard } from '@nestjs/passport';
+import { HasRole } from 'src/auth/decorator/hasRole.decorator';
+import { RolesGuard } from 'src/auth/guard/role.guard';
 
 @Controller('users')
 export class UsersController {
@@ -13,15 +17,11 @@ export class UsersController {
     return await this.usersService.create(createUserDto);
   }
 
-  @Get('allUsers')
-  @UseGuards(LocalAuthGuard)
-  @ApiBearerAuth()
+  @Get('findAll')
+  @HasRole([UserRole.ADMIN])
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   findAll() {
     return this.usersService.findAll();
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
 }

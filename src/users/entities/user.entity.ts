@@ -5,7 +5,7 @@ export class User {
     middle_name?: string;
     login: string;
     password?: string;
-    user_role: UserRole 
+    roles: UserRole[] 
 }
 
 export enum UserRole {
