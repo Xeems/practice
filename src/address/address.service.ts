@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Address } from 'utils/globalTypes';
 
-
-
-
 @Injectable()
 export class AddressService {
 
@@ -18,7 +15,7 @@ export class AddressService {
         
     }
 
-    addressNormalization(address: string): Address {
+    addressNormalization(address: string) {
         const result = {} as Address
 
         // Регулярные выражения для разбора адреса

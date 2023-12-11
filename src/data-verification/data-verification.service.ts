@@ -1,16 +1,13 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { DataService } from 'src/data/data.service';
-import { FileUploadService } from 'src/file-upload/file-upload.service';
+import { DataRow } from 'src/file/entities/dataRow.entitie';
 import { Address, Meter_readings, Error_row, Excel_document } from 'utils/globalTypes';
 
 @Injectable()
 export class DataVerificationService {
     constructor (private readonly dataService: DataService){}
 
-    async verifyDocument(addresses: Address[], meters: any[][]) {
-        if (addresses.length != meters.length) {
-            return new ConflictException('Количество адресоов и записей не совпадает')
-        }
+    async verifyDocument(data: DataRow[]) {
 
         // for (let i = 0; i < meters.length; i++) {
         //     const innerMeters = meters[i];

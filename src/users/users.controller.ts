@@ -13,6 +13,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('newUser')
+  @HasRole([UserRole.ADMIN])
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   async create(@Body() createUserDto: CreateUserDto) {
     return await this.usersService.create(createUserDto);
   }

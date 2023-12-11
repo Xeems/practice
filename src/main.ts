@@ -19,9 +19,9 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.use(cors({
-    origin: 'http://localhost:4000', // Разрешенный источник (origin)
+    origin: 'http://localhost:4000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // Разрешение передачи куки и заголовков аутентификации
+    credentials: true, 
   }));
   await app.listen(3000);
 }

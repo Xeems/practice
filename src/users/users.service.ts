@@ -7,7 +7,6 @@ export class UsersService {
 	constructor(private prisma: PrismaService) { }
 	async create(createUserDto: CreateUserDto) {
 		const user = await this.findByLogin(createUserDto.login)
-		console.log(user)
 		if (!user) {
 			const newUser = this.prisma.user.create({
 				data: createUserDto
