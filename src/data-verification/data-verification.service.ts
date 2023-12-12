@@ -1,54 +1,55 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { DataService } from 'src/data/data.service';
 import { DataRow } from 'src/file/entities/dataRow.entitie';
-import { Address, Meter_readings, Error_row, Excel_document } from 'utils/globalTypes';
+import { Meter_readings } from 'utils/globalTypes';
+import { ErrorRow } from './errorRow.entitie';
+import { Address } from 'src/address/address.entitie';
+import { error } from 'console';
 
 @Injectable()
 export class DataVerificationService {
-    constructor (private readonly dataService: DataService){}
+    constructor(private readonly dataService: DataService) { }
 
     async verifyDocument(data: DataRow[]) {
+        const validData: DataRow[] = []
+        const errors: ErrorRow[] = []
 
-        // for (let i = 0; i < meters.length; i++) {
-        //     const innerMeters = meters[i];
-        //     for (let j = 0; j < innerMeters.length; j++) {
-        //         const value = innerMeters[j];
-        //         if (value === null || typeof value !== 'number') {
-        //             return new ConflictException('Ошибки в показаниях счетчиков');
-        //         }
-        //     }
-        // }
-        return null
+        for (let i = 0; i < data.length; i++) {
+            const result = this.validateRow(data[i], i + 2)
+            if (result == null)
+                validData.push(data[i])
+            else
+                errors.push(result)
+        }
+        return { validData, errors }
     }
 
-    async checkErors(metricsWithAdresses: Meter_readings[], excel_document: Excel_document): Promise<Meter_readings[]> {
-        let errors: Error_row[] = []
-        let validData: Meter_readings[] = []
+    validateRow(data: DataRow, row: number) {
+        const errorRow: ErrorRow = { document_row: row, error_content: null }
+        const isAddressValid = this.validateAddress(data.address)
+        const isMeterReadingsValid = this.validateMeterReadings(data)
+        if (!isAddressValid)
+            errorRow.error_content ? errorRow.error_content += ', Неверный адрес' : errorRow.error_content = 'Невенрный адрес'
+        if (!isMeterReadingsValid)
+            errorRow.error_content ? errorRow.error_content += ', Неверный формат показаний счетчиков' : errorRow.error_content = 'Неверный формат показаний счетчиков'
 
-        for (let i = 0; i < metricsWithAdresses.length; i++) {
-            const metric = metricsWithAdresses[i]
-            const address = metric.address
+        if (errorRow.error_content != null)
+            return errorRow
+        else
+            return null
 
-            if (address.city == null || address.street == null || address.house == null || address.appartment == null) {
-                const error: Error_row = {
-                    document_row: i + 2,
-                    error_content: "Incorrect address",
-                    excel_document_id: excel_document.excel_document_id
-                }
-                errors.push(error)
-            }
-            else if (metric.hot_water == null || metric.cold_water == null || typeof metric.hot_water !== 'number' || typeof metric.cold_water !== 'number') {
-                const error: Error_row = {
-                    document_row: i + 2,
-                    error_content: "Incorrect meter readings",
-                    excel_document_id: excel_document.excel_document_id
-                }
-                errors.push(error)
-            }
-            else
-                validData.push(metric)
-        }
-        this.dataService.uploadErrors(errors)
-        return validData
+    }
+
+    validateAddress(address: Address) {
+        if (address.city == null || address.street == null || address.house == null || address.appartment == null)
+            return false
+        return true
+    }
+
+    validateMeterReadings(data: DataRow) {
+        if (data.hotWater == null || data.coldWater == null)
+            return false
+        return true
     }
 }
+
