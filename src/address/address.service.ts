@@ -1,19 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { Address } from 'utils/globalTypes';
+import { DataService } from 'src/data/data.service';
+import { Address } from './address.entitie';
 
 @Injectable()
 export class AddressService {
+    constructor(private readonly dataService: DataService) { }
 
-    async parseAddresses(addresses: string[]): Promise<Address[]> {
-        const parseAddresses: Address[] = []
+    // async parseAddresses(addresses: string[]) {
+    //     // const parseAddresses: Address[] = []
 
-        addresses.forEach(element => {
-            parseAddresses.push(this.addressNormalization(element))
-        });
-        
-        return parseAddresses
-        
-    }
+    //     // addresses.forEach(element => {
+    //     //     parseAddresses.push(this.addressNormalization(element))
+    //     // });
+
+    //     // return parseAddresses
+
+    // }
 
     addressNormalization(address: string) {
         const result = {} as Address
@@ -36,8 +38,9 @@ export class AddressService {
         if (streetMatch) result.street = streetMatch[1].trim();
         if (houseMatch) result.house = houseMatch[1].trim();
         if (apartmentMatch) result.appartment = apartmentMatch[1].trim();
-        
+
         return result
+
     }
 
 }

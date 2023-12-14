@@ -17,11 +17,10 @@ model User {
 	middle_name				String?
 	login					String			@unique
 	password				String
+	user_role				String			@default("USER")	
+
 	excel_document  		Excel_document[]
-	user_role				String			@default("USER")			
 }
-
-
 
 model Address {
 	address_id				Int				@default(autoincrement()) @id
@@ -29,17 +28,21 @@ model Address {
 	street					String
 	house					String
 	appartment				String
+
 	meter_readings			Meter_readings[]
 }
 
 model Meter_readings {
 	meter_readings_id		Int   			@default(autoincrement()) @id
-	address					Address			@relation(fields: [address_id], references: [address_id])
-	address_id				Int
 	hot_water				Float
 	cold_water				Float
+	date					DateTime		@default(now())
+
 	excel_document			Excel_document	@relation(fields: [excel_document_id], references: [excel_document_id])
 	excel_document_id		Int
+
+	address					Address			@relation(fields: [address_id], references: [address_id])
+	address_id				Int
 }
 
 model Excel_document{

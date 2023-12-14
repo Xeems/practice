@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Meter_readings" ADD COLUMN     "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

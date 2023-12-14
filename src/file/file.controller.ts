@@ -1,8 +1,10 @@
-import { Controller, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileTypeValidator, ParseFilePipe } from '@nestjs/common/pipes';
 import { FileService } from './file.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
+import { createReadStream } from 'fs';
+import { join } from 'path';
 
 @Controller('file')
 export class FileController {
@@ -16,7 +18,6 @@ export class FileController {
       new FileTypeValidator({ fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
     ]
   })) file: Express.Multer.File) {
-    const data = await this.fileUploadService.uploadExelFile(file)
-    return data
+    return await this.fileUploadService.uploadExelFile(file)
   }
 }

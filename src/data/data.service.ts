@@ -1,39 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { Address, Error_row, Excel_document } from 'utils/globalTypes';
+import { Address } from 'src/address/address.entitie';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Meter_readings } from 'utils/globalTypes';
+import { ExcelFile } from 'src/file/entities/excelFile.entitie';
+import { DataRow } from 'src/file/entities/dataRow.entitie';
+import { ErrorRow } from 'src/data-verification/errorRow.entitie';
 
 @Injectable()
 export class DataService {
     constructor(private prisma: PrismaService) { }
 
-    async uploadData(metrics: Meter_readings[], excel_document: Excel_document) {
-        const data: Meter_readings[] = []
-        for (let i = 0; i < metrics.length; i++)
-        {
-            metrics[i].address = await this.uploadAddressToDb(metrics[i].address)
-            metrics[i].excel_document_id = excel_document.excel_document_id
+    async uploadData(metrics: DataRow[], excelFileId: number) {
+        const result = []
+        for (let i = 0; i < metrics.length; i++) {
+            metrics[i].documentId = excelFileId
             const metric = await this.uploadMetric(metrics[i])
-            data.push(metric)
+            result.push(metric)
         }
-        return data
+        return result
     }
 
-    async uploadMetric(data: Meter_readings): Promise<Meter_readings> {
+    async uploadMetric(data: DataRow) {
         const metric = await this.prisma.meter_readings.create({
             data: {
                 address_id: data.address.address_id,
-                cold_water: data.cold_water,
-                hot_water: data.hot_water,
-                excel_document_id: data.excel_document_id
-            }
+                cold_water: data.coldWater,
+                hot_water: data.hotWater,
+                excel_document_id: data.documentId,
+                date: data.date
+            },
         })
-
         return metric
     }
 
-    async uploadAddressToDb(address: Address): Promise<Address> {
-        const existingAddress = await this.prisma.address.findFirst({
+    uploadAddressToDb(address: Address) {
+        const existingAddress = this.prisma.address.findFirst({
             where: {
                 city: address.city,
                 street: address.street,
@@ -45,7 +45,7 @@ export class DataService {
         if (existingAddress)
             return existingAddress
         else {
-            const newAddres = await this.prisma.address.create({
+            const newAddres = this.prisma.address.create({
                 data: {
                     city: address.city,
                     street: address.street,
@@ -57,14 +57,14 @@ export class DataService {
         }
     }
 
-    async uploadErrors(errors: Error_row[]){
-        for(let i = 0; i < errors.length; i++){
+    async uploadErrors(errors: ErrorRow[]) {
+        for (let i = 0; i < errors.length; i++) {
             const error = errors[i]
             await this.prisma.error.create({
-                data:{
+                data: {
                     document_row: error.document_row,
                     error_content: error.error_content,
-                    excel_document_id: error.excel_document_id
+                    excel_document_id: error.file_id
                 }
             })
         }
@@ -73,7 +73,7 @@ export class DataService {
     async uploadFileToDB(file: Express.Multer.File) {
         let dateTime = new Date()
 
-        const uploadedFile: Excel_document = await this.prisma.excel_document.create({
+        const uploadedFile = await this.prisma.excel_document.create({
             data: {
                 document_name: file.originalname,
                 upload_date: dateTime.toISOString(),
@@ -83,18 +83,18 @@ export class DataService {
         return uploadedFile
     }
 
-    async getDocumentData(document_id: number): Promise<[Excel_document, Meter_readings[], Error_row[]]> {
-        const excel_document: Excel_document = await this.prisma.excel_document.findFirstOrThrow({
-            where:{
+    async getDocumentData(document_id: number) {
+        const excel_document = await this.prisma.excel_document.findFirstOrThrow({
+            where: {
                 excel_document_id: document_id
             }
         })
 
         const meter_readings = await this.prisma.meter_readings.findMany({
-            where:{
+            where: {
                 excel_document_id: excel_document.excel_document_id
             },
-            select: {             
+            select: {
                 address_id: true,
                 address: {
                     select: {
@@ -107,14 +107,27 @@ export class DataService {
                 hot_water: true,
                 cold_water: true
             }
-             
+
         })
 
         const errors = await this.prisma.error.findMany({
-            where:{
-                excel_document_id : excel_document.excel_document_id
+            where: {
+                excel_document_id: excel_document.excel_document_id
             }
         })
         return [excel_document, meter_readings, errors]
+    }
+
+    async getPreviosuReadig(addressId: number) {
+        const lastMeterReading = await this.prisma.meter_readings.findFirst({
+            where: {
+                address_id: addressId,
+            },
+            orderBy: {
+                date: 'desc',
+            },
+        });
+
+        return lastMeterReading;
     }
 }
