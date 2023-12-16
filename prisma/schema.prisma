@@ -11,16 +11,17 @@ datasource db {
 }
 
 model User {
-    user_id					Int				@default(autoincrement()) @id
-	family_name				String
-	first_name				String
-	middle_name				String?
+    userId					Int				@default(autoincrement()) @id
+	familyName				String
+	firstName				String
+	middleName				String?
 	login					String			@unique
 	password				String
-	user_role				String			@default("USER")	
+	roles					String			@default("USER")	
 
-	excel_document  		Excel_document[]
+	excelFile  				ExcelFile[]
 }
+
 
 model Address {
 	address_id				Int				@default(autoincrement()) @id
@@ -38,27 +39,28 @@ model Meter_readings {
 	cold_water				Float
 	date					DateTime		@default(now())
 
-	excel_document			Excel_document	@relation(fields: [excel_document_id], references: [excel_document_id])
-	excel_document_id		Int
+	excelFile				ExcelFile		@relation(fields: [fileId], references: [fileId])
+	fileId					Int
 
 	address					Address			@relation(fields: [address_id], references: [address_id])
 	address_id				Int
 }
 
-model Excel_document{
-	excel_document_id		Int				@default(autoincrement()) @id
-	document_name			String
-	upload_date				DateTime	
-	user					User?			@relation(fields: [user_id], references: [user_id])
-	user_id					Int?
+model ExcelFile{
+	fileId					Int				@default(autoincrement()) @id
+	fileName				String
+	uploadDate				DateTime	
+	user					User?			@relation(fields: [userId], references: [userId])
+	userId					Int?
 	meter_readeings			Meter_readings[]
 	eror					Error[]
 }
 
 model Error{
 	error_id				Int					@default(autoincrement()) @id
-	error_content			String
-	excel_document			Excel_document	@relation(fields: [excel_document_id], references: [excel_document_id])
-	excel_document_id		Int		
+	error_content			String	
 	document_row			Int
+
+	excelFile				ExcelFile	@relation(fields: [fileId], references: [fileId])
+	fileId					Int	
 }

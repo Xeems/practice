@@ -1,8 +1,8 @@
 export class User {
-    user_id?: number;
-    family_name: string;
-    first_name: string;
-    middle_name?: string;
+    userId?: number;
+    familyName: string;
+    firstName: string;
+    middleName?: string;
     login: string;
     password?: string;
     roles: UserRole[] 

@@ -25,14 +25,14 @@ export class DataService {
                 address_id: data.address.address_id,
                 cold_water: data.coldWater,
                 hot_water: data.hotWater,
-                excel_document_id: data.documentId,
+                fileId: data.documentId,
                 date: data.date
             },
         })
         return metric
     }
 
-    uploadAddressToDb(address: Address) {
+    uploadAddress(address: Address) {
         const existingAddress = this.prisma.address.findFirst({
             where: {
                 city: address.city,
@@ -64,19 +64,20 @@ export class DataService {
                 data: {
                     document_row: error.document_row,
                     error_content: error.error_content,
-                    excel_document_id: error.file_id
+                    fileId: error.file_id
                 }
             })
         }
     }
 
-    async uploadFileToDB(file: Express.Multer.File) {
+    async uploadFile(file: Express.Multer.File, userId: number) {
         let dateTime = new Date()
 
-        const uploadedFile = await this.prisma.excel_document.create({
+        const uploadedFile = await this.prisma.excelFile.create({
             data: {
-                document_name: file.originalname,
-                upload_date: dateTime.toISOString(),
+                fileName: file.originalname,
+                uploadDate: dateTime.toISOString(),
+                userId
             }
         })
 
@@ -84,15 +85,15 @@ export class DataService {
     }
 
     async getDocumentData(document_id: number) {
-        const excel_document = await this.prisma.excel_document.findFirstOrThrow({
+        const excel_document = await this.prisma.excelFile.findFirstOrThrow({
             where: {
-                excel_document_id: document_id
+                fileId: document_id
             }
         })
 
         const meter_readings = await this.prisma.meter_readings.findMany({
             where: {
-                excel_document_id: excel_document.excel_document_id
+               fileId: excel_document.fileId
             },
             select: {
                 address_id: true,
@@ -112,7 +113,7 @@ export class DataService {
 
         const errors = await this.prisma.error.findMany({
             where: {
-                excel_document_id: excel_document.excel_document_id
+                fileId: excel_document.fileId
             }
         })
         return [excel_document, meter_readings, errors]
@@ -129,5 +130,14 @@ export class DataService {
         });
 
         return lastMeterReading;
+    }
+
+    async getUserFiles(userId: number){
+        const result = await this.prisma.excelFile.findMany({
+           where:{
+            userId
+           }
+        })
+        return result
     }
 }

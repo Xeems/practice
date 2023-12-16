@@ -50,7 +50,7 @@ export class DataVerificationService {
         if (address.city == null || address.street == null || address.house == null || address.appartment == null)
             return false
         else {
-            const result = await this.dataService.uploadAddressToDb(address)
+            const result = await this.dataService.uploadAddress(address)
             return result
         }
     }
@@ -62,10 +62,13 @@ export class DataVerificationService {
     }
 
     async validatePreviousReadings(data: DataRow) {
-        const previousResult = await this.dataService.getPreviosuReadig(data.address.address_id)
-        if (data.date !== previousResult.date)
-            if (previousResult.cold_water >= data.coldWater || previousResult.hot_water >= data.hotWater)
-                return false
+        const previousResult = await this.dataService.getPreviosuReadig(data.address?.address_id)
+        if (previousResult) {
+            if (data.date !== previousResult.date)
+                if (previousResult.cold_water >= data.coldWater || previousResult.hot_water >= data.hotWater)
+                    return false
+        }
+
 
         return true
     }
