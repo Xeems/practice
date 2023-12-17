@@ -18,16 +18,16 @@ export class UploadFileService {
         await workbook.xlsx.load(fileData);
         const worksheet = workbook.getWorksheet(1)
 
-        const doucument = await this.dataService.uploadFile(file, userId)
-
-        return doucument
         const data = await this.parseDocumentData(worksheet)
         const { validData, errors } = await this.dataVerificationService.verifyDocument(data)
         
-
         this.markErrors(errors, worksheet)
         
-        return await this.dataService.uploadData(validData, doucument.fileId)
+        const document = await this.dataService.uploadFile(file, userId)
+        
+        const uploadedData = await this.dataService.uploadData(validData, document.fileId)
+        
+        return true
     }
 
     async parseDocumentData(worksheet: ExcelJS.Worksheet) {

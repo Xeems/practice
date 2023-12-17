@@ -49,9 +49,12 @@ model Meter_readings {
 model ExcelFile{
 	fileId					Int				@default(autoincrement()) @id
 	fileName				String
-	uploadDate				DateTime	
+	uploadDate				DateTime
+	fileContent				Bytes
+
 	user					User?			@relation(fields: [userId], references: [userId])
 	userId					Int?
+
 	meter_readeings			Meter_readings[]
 	eror					Error[]
 }

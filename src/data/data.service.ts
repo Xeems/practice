@@ -32,8 +32,8 @@ export class DataService {
         return metric
     }
 
-    uploadAddress(address: Address) {
-        const existingAddress = this.prisma.address.findFirst({
+    async uploadAddress(address: Address) {
+        const existingAddress = await this.prisma.address.findFirst({
             where: {
                 city: address.city,
                 street: address.street,
@@ -45,7 +45,7 @@ export class DataService {
         if (existingAddress)
             return existingAddress
         else {
-            const newAddres = this.prisma.address.create({
+            const newAddres = await this.prisma.address.create({
                 data: {
                     city: address.city,
                     street: address.street,
@@ -77,46 +77,48 @@ export class DataService {
             data: {
                 fileName: file.originalname,
                 uploadDate: dateTime.toISOString(),
-                userId
+                userId: userId,
+                fileContent: file.buffer
             }
         })
 
         return uploadedFile
     }
 
-    async getDocumentData(document_id: number) {
-        const excel_document = await this.prisma.excelFile.findFirstOrThrow({
+    async getExcelDocument(fileId: number) {
+        const excelFile = await this.prisma.excelFile.findFirstOrThrow({
             where: {
-                fileId: document_id
+                fileId
             }
         })
 
-        const meter_readings = await this.prisma.meter_readings.findMany({
-            where: {
-               fileId: excel_document.fileId
-            },
-            select: {
-                address_id: true,
-                address: {
-                    select: {
-                        city: true,
-                        street: true,
-                        house: true,
-                        appartment: true
-                    }
-                },
-                hot_water: true,
-                cold_water: true
-            }
+        // const meter_readings = await this.prisma.meter_readings.findMany({
+        //     where: {
+        //        fileId: excel_document.fileId
+        //     },
+        //     select: {
+        //         address_id: true,
+        //         address: {
+        //             select: {
+        //                 city: true,
+        //                 street: true,
+        //                 house: true,
+        //                 appartment: true
+        //             }
+        //         },
+        //         hot_water: true,
+        //         cold_water: true
+        //     }
 
-        })
+        // })
 
-        const errors = await this.prisma.error.findMany({
-            where: {
-                fileId: excel_document.fileId
-            }
-        })
-        return [excel_document, meter_readings, errors]
+        // const errors = await this.prisma.error.findMany({
+        //     where: {
+        //         fileId: excel_document.fileId
+        //     }
+        // })
+
+        return excelFile
     }
 
     async getPreviosuReadig(addressId: number) {

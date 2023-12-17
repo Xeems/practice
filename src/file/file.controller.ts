@@ -1,10 +1,8 @@
-import { Controller, Get, Post, Req, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, Response, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileTypeValidator, ParseFilePipe } from '@nestjs/common/pipes';
 import { UploadFileService } from './uploadFile.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
-import { createReadStream } from 'fs';
-import { join } from 'path';
 import { FileService } from './file.service';
 
 @Controller('file')
@@ -26,7 +24,21 @@ export class FileController {
 
   @Get("/userFiles")
   @UseGuards(AuthGuard('jwt'))
-  async getUserFiles(@Req() req: any){
+  async getUserFiles(@Req() req: any) {
     return await this.fileService.getUserFiles(req.user.user_id)
+  }
+
+  @Get()
+  @UseGuards(AuthGuard('jwt'))
+  async getFile(@Req() req: any, fileId: number, @Response({ passthrough: true }) res) {
+    const workbook = await this.fileService.getFile(fileId)
+
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': 'attachment; filename=example.xlsx'
+    });
+
+    await workbook.xlsx.write(res);
+    res.end()
   }
 }
