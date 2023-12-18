@@ -43,4 +43,9 @@ export class FileController {
     });
     res.send(dataBuffer)
   }
+
+  @Get('123')
+  async get() {
+    return "whoper whoper"
+  }
 }
