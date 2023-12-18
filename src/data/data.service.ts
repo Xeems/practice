@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Address } from 'src/address/address.entitie';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ExcelFile } from 'src/file/entities/excelFile.entitie';
 import { DataRow } from 'src/file/entities/dataRow.entitie';
 import { ErrorRow } from 'src/data-verification/errorRow.entitie';
 
@@ -70,15 +69,15 @@ export class DataService {
         }
     }
 
-    async uploadFile(file: Express.Multer.File, userId: number) {
+    async uploadFile(fileName: string, buffer: Buffer, userId: number) {
         let dateTime = new Date()
 
         const uploadedFile = await this.prisma.excelFile.create({
             data: {
-                fileName: file.originalname,
+                fileName: fileName,
                 uploadDate: dateTime.toISOString(),
                 userId: userId,
-                fileContent: file.buffer
+                fileContent: buffer
             }
         })
 
@@ -86,9 +85,10 @@ export class DataService {
     }
 
     async getExcelDocument(fileId: number) {
+        console.log(fileId)
         const excelFile = await this.prisma.excelFile.findFirstOrThrow({
             where: {
-                fileId
+                fileId: fileId
             }
         })
 

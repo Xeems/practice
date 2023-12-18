@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Req, Res, Response, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, Post, Req, Res, Response, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileTypeValidator, ParseFilePipe } from '@nestjs/common/pipes';
 import { UploadFileService } from './uploadFile.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import { FileService } from './file.service';
+import { Readable } from 'stream';
 
 @Controller('file')
 export class FileController {
@@ -28,17 +29,18 @@ export class FileController {
     return await this.fileService.getUserFiles(req.user.user_id)
   }
 
-  @Get()
+  @Get(':fileId')
   @UseGuards(AuthGuard('jwt'))
-  async getFile(@Req() req: any, fileId: number, @Response({ passthrough: true }) res) {
-    const workbook = await this.fileService.getFile(fileId)
+  async getFile(@Param('fileId') fileId: string, @Response({ passthrough: true }) res) {
+    console.log(fileId)
+    const workbook = await this.fileService.getFile(parseInt(fileId))
+    const dataBuffer = await workbook.xlsx.writeBuffer()
 
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': 'attachment; filename=example.xlsx'
+      'Content-Disposition': 'attachment; filename=example.xlsx',
+      'Content-Length': dataBuffer.byteLength,
     });
-
-    await workbook.xlsx.write(res);
-    res.end()
+    res.send(dataBuffer)
   }
 }

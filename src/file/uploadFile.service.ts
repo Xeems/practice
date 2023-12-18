@@ -6,6 +6,7 @@ import { ErrorRow } from 'src/data-verification/errorRow.entitie';
 import { DataRow } from './entities/dataRow.entitie';
 import { DataService } from 'src/data/data.service';
 
+
 @Injectable()
 export class UploadFileService {
     constructor(private readonly addressService: AddressService,
@@ -13,20 +14,25 @@ export class UploadFileService {
         private readonly dataService: DataService) { }
 
     async uploadExelFile(file: Express.Multer.File, userId: number) {
-        const fileData = file.buffer
+        const fileName = file.originalname
+        const fileBuffer = file.buffer
         const workbook = new ExcelJS.Workbook()
-        await workbook.xlsx.load(fileData);
+        await workbook.xlsx.load(fileBuffer);
         const worksheet = workbook.getWorksheet(1)
 
         const data = await this.parseDocumentData(worksheet)
         const { validData, errors } = await this.dataVerificationService.verifyDocument(data)
         
-        this.markErrors(errors, worksheet)
-        
-        const document = await this.dataService.uploadFile(file, userId)
-        
+        await this.markErrors(errors, worksheet)
+        // await workbook.xlsx.writeFile('export.xlsx');
+
+        // const newWorkbook = new ExcelJS.Workbook();
+        // await newWorkbook.xlsx.readFile('export.xlsx');
+
+        const newBuffer = await workbook.xlsx.writeBuffer() as Buffer
+        const document = await this.dataService.uploadFile(fileName, newBuffer, userId)
+
         const uploadedData = await this.dataService.uploadData(validData, document.fileId)
-        
         return true
     }
 

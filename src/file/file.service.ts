@@ -14,11 +14,8 @@ export class FileService {
     async getFile(fileId: number){
 
         const result = await this.dataService.getExcelDocument(fileId)
-        const buffer = result.fileContent
-
         const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet();
-        await workbook.xlsx.load(buffer)
+        await workbook.xlsx.load(result.fileContent)
         
         return workbook
     }
